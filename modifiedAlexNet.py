@@ -92,3 +92,17 @@ def alexnet(pretrained=False, progress=True, **kwargs):
         net.new_classifier[4].bias.data = net.classifier[4].bias.data.clone()
         
     return net
+
+class ReverseLayerF(Function):
+
+    # Forwards identity
+    # Sends backward reversed gradients
+    @staticmethod
+    def forward(ctx, x, alpha):
+        ctx.alpha = alpha
+        return x.view_as(x)
+        
+    @staticmethod
+    def backward(ctx, grad_output):
+        output = grad_output.neg() * ctx.alpha
+        return output, None
